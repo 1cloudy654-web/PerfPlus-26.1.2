@@ -15,17 +15,22 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - name: Extract project
+      - name: Extract ZIP
         run: |
           unzip -o PerfPlus-26.1.2-.zip -d extracted
-          find extracted -name gradlew
 
-      - name: Build
+      - name: Find and build project
         run: |
-          PROJECT_DIR="$(dirname "$(find extracted -name gradlew | head -1)")"
+          PROJECT_DIR=$(find extracted -type f \( -name build.gradle -o -name build.gradle.kts \) -printf '%h\n' | head -1)
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "Nu am găsit build.gradle în arhivă!"
+            find extracted -maxdepth 5 -type f
+            exit 1
+          fi
+
           cd "$PROJECT_DIR"
-          chmod +x gradlew
-          ./gradlew build --no-daemon
+          gradle build --no-daemon
 
       - uses: actions/upload-artifact@v4
         with:
