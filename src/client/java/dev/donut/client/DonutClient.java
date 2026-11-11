@@ -1,41 +1,31 @@
-
 package dev.donut.client;
 
-import dev.donut.client.gui.ClickGui;
-import dev.donut.client.module.ModuleManager;
-
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
-
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 public class DonutClient implements ClientModInitializer {
 
-    private static KeyMapping openGuiKey;
+    public static final String NAME = "DonutSMP Client";
 
     @Override
     public void onInitializeClient() {
-
-        openGuiKey = KeyMappingHelper.registerKeyMapping(
-            new KeyMapping(
-                "key.perfplus.gui",
-                GLFW.GLFW_KEY_RIGHT_SHIFT,
-                KeyMapping.Category.MISC
-            )
+        KeyMapping key = new KeyMapping(
+            "key.donutclient.gui",
+            GLFW.GLFW_KEY_RIGHT_SHIFT,
+            KeyMapping.Category.MISC
         );
 
-        ClientTickEvents.END_CLIENT_TICK.register(mc -> {
+        KeyMappingHelper.registerKeyMapping(key);
 
-            ModuleManager.tick(mc);
-
-            while (openGuiKey.consumeClick()) {
-                if (mc.screen == null) {
-                    mc.setScreen(new ClickGui());
-                }
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (key.consumeClick()) {
+                client.setScreen(new dev.donut.client.gui.ClickGui());
             }
         });
     }
